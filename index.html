@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energy Intel Platform</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#f8f7f4;color:#1a1a18;min-height:100vh}
+.container{max-width:1100px;margin:0 auto;padding:24px 20px 60px}
+button{font-family:inherit;cursor:pointer}
+textarea,input{font-family:inherit}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.fin{animation:fadeIn 0.3s ease}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:2px}
+/* Header */
+.header{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:16px;margin-bottom:20px;border-bottom:0.5px solid #e0ddd8}
+.header-label{font-size:9px;letter-spacing:0.15em;color:#888;margin:0 0 4px;text-transform:uppercase}
+.header-title{font-size:22px;font-weight:500;margin:0;color:#1a1a18}
+.header-date{font-size:11px;color:#888;text-align:right}
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;border-bottom:0.5px solid #e0ddd8;padding-bottom:0}
+.tab{padding:8px 16px;font-size:12px;border-radius:8px 8px 0 0;border:0.5px solid #e0ddd8;border-bottom:none;background:#f1efe8;color:#888;cursor:pointer;margin-bottom:-1px;transition:all 0.15s}
+.tab.active{background:#fff;color:#1a1a18;font-weight:500}
+.tab-desc{font-size:9px;color:#aaa;display:block;margin-top:1px}
+/* Cards */
+.card{background:#fff;border:0.5px solid #e0ddd8;border-radius:12px;overflow:hidden;margin-bottom:8px}
+.card-header{padding:10px 14px;border-bottom:0.5px solid #e0ddd8;background:#f8f7f4;display:flex;gap:8px;align-items:center}
+.card-header span{font-size:11px;font-weight:500;letter-spacing:0.03em}
+.card-body{padding:10px 14px}
+.item{display:flex;gap:8px;padding:5px 0;border-bottom:0.5px solid #f0ede8}
+.item:last-child{border-bottom:none}
+.item-dash{color:#aaa;font-size:10px;margin-top:3px;flex-shrink:0}
+.item-text{margin:0;font-size:12px;line-height:1.55;color:#1a1a18}
+.sub-label{font-size:9px;font-weight:500;letter-spacing:0.08em;text-transform:uppercase;color:#185FA5;margin:10px 0 4px}
+.para{margin:2px 0;font-size:12px;line-height:1.6;color:#555}
+/* Chips */
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
+.chip{padding:3px 9px;font-size:11px;border-radius:6px;border:0.5px solid #e0ddd8;background:#fff;color:#666;cursor:pointer;transition:all 0.12s}
+.chip.on-blue{border:1.5px solid #185FA5;background:#E6F1FB;color:#185FA5}
+.chip.on-green{border:1.5px solid #3B6D11;background:#EAF3DE;color:#3B6D11}
+/* Buttons */
+.btn-primary{padding:9px 22px;font-size:13px;font-weight:500;border-radius:8px;border:0.5px solid #ccc;background:#1a1a18;color:#fff;transition:opacity 0.15s}
+.btn-primary:disabled{background:#f0ede8;color:#aaa;cursor:not-allowed}
+.btn-secondary{padding:6px 14px;font-size:11px;border-radius:8px;border:0.5px solid #e0ddd8;background:transparent;color:#666}
+/* Spinner */
+.spinner-wrap{text-align:center;padding:3rem 1rem;background:#f8f7f4;border-radius:12px;border:0.5px solid #e0ddd8}
+.spinner-icon{font-size:20px;display:inline-block;animation:spin 1.5s linear infinite;margin-bottom:10px}
+.spinner-text{font-size:12px;color:#666;margin:0}
+/* Search log */
+.search-log{padding:6px 10px;background:#f8f7f4;border-radius:6px;font-size:10px;color:#aaa;margin-bottom:10px;line-height:1.7}
+/* Source grid */
+.source-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.source-card{background:#fff;border:0.5px solid #e0ddd8;border-radius:10px;padding:11px 13px}
+.source-card-head{display:flex;align-items:center;gap:6px;margin-bottom:8px;padding-bottom:7px;border-bottom:0.5px solid #f0ede8}
+.badge-gov{font-size:9px;padding:1px 5px;background:#E6F1FB;color:#185FA5;border-radius:3px}
+.badge-ind{font-size:9px;padding:1px 5px;background:#EAF3DE;color:#3B6D11;border-radius:3px}
+.badge-label{font-size:8px;color:#aaa;margin:0 0 3px;letter-spacing:0.08em;text-transform:uppercase}
+/* Telegram */
+.tg-textarea{width:100%;height:200px;padding:12px 14px;font-size:12px;line-height:1.65;border:0.5px solid #e0ddd8;border-radius:10px;background:#f8f7f4;color:#1a1a18;resize:vertical;outline:none}
+.tg-textarea:focus{border-color:#999}
+/* Impact grid */
+.impact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:8px}
+/* Region filter */
+.region-row{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px}
+.region-chip{padding:2px 8px;font-size:10px;border-radius:5px;border:0.5px solid #e0ddd8;background:#fff;color:#666;cursor:pointer}
+.region-chip.active{border:1.5px solid #185FA5;background:#E6F1FB;color:#185FA5}
+/* Error */
+.error-box{padding:10px 14px;background:#FCEBEB;border-radius:8px;color:#A32D2D;font-size:12px;margin-bottom:12px}
+/* Info box */
+.info-box{padding:12px 14px;background:#f8f7f4;border-radius:10px;border:0.5px solid #e0ddd8;margin-bottom:14px}
+.info-box strong{color:#1a1a18}
+/* Empty state */
+.empty{padding:24px;text-align:center;background:#f8f7f4;border-radius:12px;font-size:12px;color:#888;line-height:1.8}
+/* Neutral principle */
+.neutral-banner{display:flex;gap:10px;padding:10px 14px;background:#f8f7f4;border-radius:10px;border:0.5px solid #e0ddd8;margin-bottom:14px}
+/* Event line */
+.event-line{padding:9px 0;border-bottom:0.5px solid #f0ede8}
+.event-meta{display:flex;gap:6px;align-items:center;margin-bottom:5px;flex-wrap:wrap}
+.cat-badge{font-size:9px;font-weight:500;padding:2px 7px;border-radius:4px}
+/* Login */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f8f7f4}
+.login-card{background:#fff;border:0.5px solid #e0ddd8;border-radius:16px;padding:40px;width:360px;text-align:center}
+.login-title{font-size:18px;font-weight:500;margin:0 0 6px}
+.login-sub{font-size:12px;color:#888;margin:0 0 24px}
+.login-input{width:100%;padding:10px 14px;font-size:13px;border:0.5px solid #e0ddd8;border-radius:8px;margin-bottom:10px;outline:none;font-family:inherit;background:#f8f7f4}
+.login-input:focus{border-color:#999;background:#fff}
+.login-btn{width:100%;padding:10px;font-size:13px;font-weight:500;border-radius:8px;border:none;background:#1a1a18;color:#fff;cursor:pointer;margin-top:4px}
+.login-error{font-size:12px;color:#A32D2D;margin:8px 0 0}
+@media(max-width:600px){.tabs{overflow-x:auto}.header{flex-direction:column;gap:8px}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useCallback}=React;
+
+// ═══ CONFIG ═══════════════════════════════════════════════════
+// Щоб додати/змінити доступ — змініть список нижче
+const USERS = [
+  {login:"admin", pass:"energy2026"},
+  {login:"trader1", pass:"intel2026"},
+];
+
+// ═══ MEDIA DB ═════════════════════════════════════════════════
+const MEDIA_DB=[
+  {code:"UA",name:"Україна",flag:"🇺🇦",region:"Пряма",gov:["Укрінформ","УНІАН","Укренерго","НКРЕКП","ОГТСУ"],ind:["Економічна правда","NV Energy","UA Energy"]},
+  {code:"RO",name:"Румунія",flag:"🇷🇴",region:"Пряма",gov:["Agerpres","Digi24","Transelectrica","Transgaz"],ind:["HotNews","G4Media","Economica.net"]},
+  {code:"PL",name:"Польща",flag:"🇵🇱",region:"Пряма",gov:["PAP","TVP Info","PSE","GAZ-SYSTEM"],ind:["Gazeta Wyborcza","Rzeczpospolita"]},
+  {code:"SK",name:"Словаччина",flag:"🇸🇰",region:"Пряма",gov:["TASR","SEPS","Eustream"],ind:["SME","Denník N"]},
+  {code:"HU",name:"Угорщина",flag:"🇭🇺",region:"Пряма",gov:["MTI","MAVIR","FGSZ"],ind:["Telex","HVG"]},
+  {code:"MD",name:"Молдова",flag:"🇲🇩",region:"Пряма",gov:["Moldpres","Moldelectrica"],ind:["Newsmaker"]},
+  {code:"EU",name:"ЄС / Brussels",flag:"🇪🇺",region:"Регулятор",gov:["EC Press","ACER","ENTSO-E","ENTSOG","REPowerEU"],ind:["Euractiv","Politico EU","Energy Monitor"]},
+  {code:"DE",name:"Німеччина",flag:"🇩🇪",region:"Ключова",gov:["ARD","ZDF","50Hertz","GASCADE"],ind:["Handelsblatt","Spiegel","FAZ"]},
+  {code:"FR",name:"Франція",flag:"🇫🇷",region:"Ключова",gov:["Le Monde","BFM Business","RTE","GRTgaz"],ind:["Financial Times","Libération"]},
+  {code:"UK",name:"Велика Британія",flag:"🇬🇧",region:"Ключова",gov:["BBC","National Grid ESO"],ind:["Financial Times","The Guardian"]},
+  {code:"US",name:"США",flag:"🇺🇸",region:"Ключова",gov:["AP","VOA","EIA"],ind:["Bloomberg","WSJ","Politico"]},
+  {code:"NO",name:"Норвегія",flag:"🇳🇴",region:"Газ/LNG",gov:["NTB","Statnett","Gassco","Equinor"],ind:["E24","Offshore Energy"]},
+  {code:"NL",name:"Нідерланди",flag:"🇳🇱",region:"Газ/TTF",gov:["ANP","Gasunie GTS"],ind:["NRC","ICE TTF"]},
+  {code:"AZ",name:"Азербайджан",flag:"🇦🇿",region:"Газ/SOCAR",gov:["AzərTac","Trend","SOCAR"],ind:["Meydan TV"]},
+  {code:"TR",name:"Туреччина",flag:"🇹🇷",region:"Транзит",gov:["Anadolu Agency","TRT World","BOTAŞ"],ind:["Hurriyet Daily"]},
+  {code:"SA",name:"Саудівська Аравія",flag:"🇸🇦",region:"ОПЕК+",gov:["SPA","Arab News","Saudi Aramco"],ind:[]},
+  {code:"RU",name:"Росія",flag:"🇷🇺",region:"Агресор",gov:["ТАСС","РИА Новості","RT"],ind:[]},
+  {code:"CN",name:"Китай",flag:"🇨🇳",region:"Глобал",gov:["Xinhua","CGTN","Global Times"],ind:[]},
+  {code:"AE",name:"ОАЕ",flag:"🇦🇪",region:"ОПЕК+",gov:["WAM","The National","ADNOC"],ind:[]},
+  {code:"QA",name:"Катар",flag:"🇶🇦",region:"LNG",gov:["QNA","Al Jazeera","QatarEnergy"],ind:[]},
+  {code:"JP",name:"Японія",flag:"🇯🇵",region:"LNG ринок",gov:["NHK","Nikkei"],ind:["Japan Times"]},
+  {code:"RS",name:"Сербія",flag:"🇷🇸",region:"Балкани",gov:["Tanjug","EMS","Gastrans"],ind:["N1 Serbia"]},
+  {code:"INT",name:"Агенції",flag:"🌐",region:"Аналітика",gov:[],ind:["Reuters","Bloomberg NEF","S&P Platts","ICIS","Argus Media","IEA","ACER REMIT"]},
+];
+
+const REGIONS=["Всі","Пряма","Регулятор","Ключова","Газ/LNG","Газ/TTF","Транзит","ОПЕК+","LNG ринок","Балкани","Агресор","Глобал","Аналітика"];
+
+const TOPICS=[
+  {id:"gas",l:"Природний газ",c:"#185FA5",bg:"#E6F1FB"},
+  {id:"power",l:"Електроенергія",c:"#3B6D11",bg:"#EAF3DE"},
+  {id:"oil",l:"Нафта / ОПЕК+",c:"#854F0B",bg:"#FAEEDA"},
+  {id:"nuclear",l:"Ядерна",c:"#993556",bg:"#FBEAF0"},
+  {id:"renewable",l:"ВДЕ / клімат",c:"#0F6E56",bg:"#E1F5EE"},
+  {id:"sanctions",l:"Санкції",c:"#A32D2D",bg:"#FCEBEB"},
+  {id:"transit",l:"Транзит / LNG",c:"#534AB7",bg:"#EEEDFE"},
+  {id:"prices",l:"Ціни / TTF",c:"#5F5E5A",bg:"#F1EFE8"},
+  {id:"speeches",l:"Заяви лідерів",c:"#185FA5",bg:"#E6F1FB"},
+];
+
+const LOAD_MSGS=["Шукаю актуальні новини...","Аналізую заяви лідерів...","Перевіряю дані TSO...","Оцінюю ринкові імплікації...","Формую брифінг..."];
+
+// ═══ HELPERS ══════════════════════════════════════════════════
+function parse(text){
+  const secs=[];let cur=null;
+  for(const raw of text.split("\n")){
+    const l=raw.trimEnd();
+    if(l.startsWith("## ")){if(cur)secs.push(cur);cur={title:l.slice(3).trim(),items:[]};}
+    else if(l.startsWith("### ")){cur?.items.push({t:"sub",v:l.slice(4).trim()});}
+    else if(l.match(/^[-•*\d][\.\s]/)){cur?.items.push({t:"li",v:l.replace(/^[-•*\d+\.]\s*/,"")});}
+    else if(l.startsWith("**")&&l.includes("**")&&l.length>4){cur?.items.push({t:"event",v:l});}
+    else if(l.trim()){cur?.items.push({t:"p",v:l.trim()});}
+  }
+  if(cur)secs.push(cur);
+  return secs;
+}
+
+const SMETA={
+  "КЛЮЧ":{icon:"📰",color:"#185FA5"},
+  "ЗАЯВ":{icon:"🎙",color:"#534AB7"},
+  "РИНК":{icon:"📊",color:"#3B6D11"},
+  "МАТР":{icon:"⚠",color:"#A32D2D"},
+  "ТОРГ":{icon:"💡",color:"#854F0B"},
+  "ДАЙД":{icon:"📱",color:"#3B6D11"},
+  "ЩО В":{icon:"📋",color:"#5F5E5A"},
+  "ВПЛИ":{icon:"🔍",color:"#185FA5"},
+  "ПІДС":{icon:"📋",color:"#854F0B"},
+  "СИГН":{icon:"🔔",color:"#3B6D11"},
+  "ЕКСЛ":{icon:"⭐",color:"#854F0B"},
+};
+function getMeta(title){
+  const u=title.toUpperCase().slice(0,4);
+  return SMETA[u]||{icon:"·",color:"#888"};
+}
+
+const IMPACT_COLORS={
+  "ВПЛИВ НА УКРАЇНУ":{icon:"🇺🇦",bg:"#E6F1FB",c:"#185FA5"},
+  "ВПЛИВ НА СВІТ":{icon:"🌍",bg:"#EAF3DE",c:"#3B6D11"},
+  "ВПЛИВ НА ЕНЕРГЕТИКУ Є":{icon:"⚡",bg:"#FAEEDA",c:"#854F0B"},
+  "ВПЛИВ НА ЕНЕРГЕТИКУ У":{icon:"🔋",bg:"#EEEDFE",c:"#534AB7"},
+};
+function getImpact(title){
+  const u=title.toUpperCase();
+  for(const[k,v]of Object.entries(IMPACT_COLORS))if(u.startsWith(k))return v;
+  return null;
+}
+
+async function callClaude(prompt,useSearch=false){
+  const tools=useSearch?[{type:"web_search_20250305",name:"web_search"}]:[];
+  const res=await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:5000,
+      ...(tools.length?{tools}:{}),
+      messages:[{role:"user",content:prompt}]})
+  });
+  const d=await res.json();
+  if(d.type==="error")throw new Error(d.error?.message||"API error");
+  const searches=(d.content||[]).filter(b=>b.type==="tool_use"&&b.name==="web_search").map(b=>b.input?.query||"");
+  const text=(d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n");
+  return{text,searches};
+}
+
+// ═══ COMPONENTS ═══════════════════════════════════════════════
+function Spinner({msgs}){
+  const [i,setI]=useState(0);
+  useEffect(()=>{const t=setInterval(()=>setI(x=>(x+1)%(msgs||LOAD_MSGS).length),2600);return()=>clearInterval(t);},[]);
+  return(
+    <div className="spinner-wrap">
+      <div className="spinner-icon">⟳</div>
+      <p className="spinner-text">{(msgs||LOAD_MSGS)[i]}</p>
+    </div>
+  );
+}
+
+function SectionCard({sec}){
+  const m=getMeta(sec.title);
+  const imp=getImpact(sec.title);
+  const bg=imp?imp.bg:"#f8f7f4";
+  const tc=imp?imp.c:m.color;
+  return(
+    <div className="card fin">
+      <div className="card-header" style={{background:bg}}>
+        <span>{imp?imp.icon:m.icon}</span>
+        <span style={{color:tc}}>{sec.title}</span>
+      </div>
+      <div className="card-body">
+        {sec.items.map((item,j)=>{
+          if(item.t==="sub")return <p key={j} className="sub-label" style={{color:tc}}>{item.v}</p>;
+          if(item.t==="event"){
+            const cat=item.v.match(/\*\*\[(.+?)\]\*\*/)?.[1]||"";
+            const rest=item.v.replace(/\*\*\[.+?\]\*\*/,"").replace(/\*/g,"").trim();
+            const cats={ВІЙНА:{c:"#A32D2D",bg:"#FCEBEB"},ПОЛІТИКА:{c:"#534AB7",bg:"#EEEDFE"},ЕКОНОМІКА:{c:"#854F0B",bg:"#FAEEDA"},ЕНЕРГЕТИКА:{c:"#185FA5",bg:"#E6F1FB"},СУСПІЛЬСТВО:{c:"#3B6D11",bg:"#EAF3DE"},МІЖНАРОДНЕ:{c:"#0F6E56",bg:"#E1F5EE"}};
+            const cc=cats[cat]||{c:"#888",bg:"#f1efe8"};
+            return(
+              <div key={j} className="event-line">
+                <div className="event-meta">
+                  {cat&&<span className="cat-badge" style={{background:cc.bg,color:cc.c}}>{cat}</span>}
+                  <span style={{fontSize:11,color:"#888",marginLeft:"auto"}}>{rest.match(/📡[^\n]*/)?.[0]||""}</span>
+                </div>
+                <p style={{margin:0,fontSize:12,lineHeight:1.55,color:"#1a1a18"}}>{rest.replace(/(✅|⚡|🔘)[^•\n]*/,"").replace(/📡[^\n]*/,"").replace(/•/g,"").trim()}</p>
+              </div>
+            );
+          }
+          if(item.t==="li")return(
+            <div key={j} className="item">
+              <span className="item-dash">—</span>
+              <p className="item-text">{item.v}</p>
+            </div>);
+          return <p key={j} className="para">{item.v}</p>;
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ═══ TAB 1: WORLD MEDIA ═══════════════════════════════════════
+function TabMedia({selC,setSelC,selT,setSelT}){
+  const [region,setRegion]=useState("Всі");
+  const [loading,setLoading]=useState(false);
+  const [sections,setSections]=useState([]);
+  const [searches,setSearches]=useState([]);
+  const [err,setErr]=useState("");
+
+  const filtered=MEDIA_DB.filter(c=>region==="Всі"||c.region===region);
+  const today=new Date().toLocaleDateString("uk-UA",{day:"numeric",month:"long",year:"numeric"});
+
+  const analyze=async()=>{
+    if(!selC.length||!selT.length)return;
+    setLoading(true);setSections([]);setErr("");setSearches([]);
+    const cBlock=selC.map(code=>{const c=MEDIA_DB.find(x=>x.code===code);if(!c)return"";return`${c.flag}${c.name}: держ:[${c.gov.join(",")}] незал:[${c.ind.join(",")}]`;}).filter(Boolean).join("\n");
+    const tList=TOPICS.filter(t=>selT.includes(t.id)).map(t=>t.l).join(", ");
+    try{
+      const{text,searches:sq}=await callClaude(`Ти старший аналітик енергетичного ринку. Сьогодні ${today}. Використай web_search МІНІМУМ 6 разів.
+
+КРАЇНИ:\n${cBlock}
+ТЕМИ: ${tList}
+
+Відповідь українською:
+
+## КЛЮЧОВІ НОВИНИ
+🔴/🟡/🟢 КРАЇНА | Джерело | Суть | Вплив. Мінімум 10 новин.
+
+## ЗАЯВИ ЛІДЕРІВ
+👤 Ім'я, Посада — Заява — Вплив
+
+## РИНКОВІ ІМПЛІКАЦІЇ
+### Природний газ / TTF
+### Електроенергія / DAM
+### Нафта / Brent
+### Геополітика
+
+## МАТРИЦЯ РИЗИКІВ
+- [Ризик]: 🔴/🟡/🟢 — Причина
+
+## ТОРГОВІ СИГНАЛИ
+5 сигналів для трейдера (фокус RO→UA арбітраж)`,true);
+      setSearches(sq);setSections(parse(text));
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  };
+
+  return(
+    <div>
+      <div style={{marginBottom:10}}>
+        <p style={{fontSize:9,letterSpacing:"0.1em",color:"#888",margin:"0 0 5px",textTransform:"uppercase"}}>Регіон / вплив</p>
+        <div className="region-row">{REGIONS.map(r=><button key={r} className={`region-chip${region===r?" active":""}`} onClick={()=>setRegion(r)}>{r}</button>)}</div>
+      </div>
+      <div style={{marginBottom:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+          <p style={{fontSize:9,letterSpacing:"0.1em",color:"#888",margin:0,textTransform:"uppercase"}}>Країни ({selC.length})</p>
+          <div style={{display:"flex",gap:8}}>
+            <button style={{fontSize:10,background:"none",border:"none",color:"#185FA5",cursor:"pointer"}} onClick={()=>setSelC(filtered.map(c=>c.code))}>всі</button>
+            <button style={{fontSize:10,background:"none",border:"none",color:"#aaa",cursor:"pointer"}} onClick={()=>setSelC([])}>скинути</button>
+          </div>
+        </div>
+        <div className="chips">{filtered.map(c=><button key={c.code} className={`chip${selC.includes(c.code)?" on-blue":""}`} onClick={()=>setSelC(p=>p.includes(c.code)?p.filter(x=>x!==c.code):[...p,c.code])}>{c.flag} {c.name}</button>)}</div>
+      </div>
+      <div style={{marginBottom:12}}>
+        <p style={{fontSize:9,letterSpacing:"0.1em",color:"#888",margin:"0 0 5px",textTransform:"uppercase"}}>Теми</p>
+        <div className="chips">{TOPICS.map(t=><button key={t.id} className={`chip${selT.includes(t.id)?" on-blue":""}`} style={selT.includes(t.id)?{borderColor:t.c,background:t.bg,color:t.c}:{}} onClick={()=>setSelT(p=>p.includes(t.id)?p.filter(x=>x!==t.id):[...p,t.id])}>{t.l}</button>)}</div>
+      </div>
+      <button className="btn-primary" onClick={analyze} disabled={loading||!selC.length||!selT.length} style={{marginBottom:14}}>{loading?"Аналізую...":"Запустити аналіз ↗"}</button>
+      {loading&&<Spinner/>}
+      {err&&<div className="error-box">Помилка: {err}</div>}
+      {!loading&&searches.length>0&&<div className="search-log">🔍 {searches.map((q,i)=><span key={i} style={{marginRight:8}}>"{q}"</span>)}</div>}
+      {!loading&&sections.map((s,i)=><SectionCard key={i} sec={s}/>)}
+      {!loading&&sections.length===0&&!err&&(
+        <div>
+          <p style={{fontSize:9,color:"#aaa",letterSpacing:"0.08em",margin:"0 0 8px",textTransform:"uppercase"}}>Джерела — держ. та незалежні ЗМІ + TSO</p>
+          <div className="source-grid">{MEDIA_DB.filter(c=>selC.includes(c.code)).map(c=>(
+            <div key={c.code} className="source-card">
+              <div className="source-card-head"><span style={{fontSize:14}}>{c.flag}</span><span style={{fontSize:12,fontWeight:500}}>{c.name}</span><span style={{fontSize:9,color:"#aaa",marginLeft:4}}>{c.region}</span></div>
+              {c.gov.length>0&&<div style={{marginBottom:5}}><p className="badge-label">Держ / провладні</p><div style={{display:"flex",flexWrap:"wrap",gap:2}}>{c.gov.map(s=><span key={s} className="badge-gov">{s}</span>)}</div></div>}
+              {c.ind.length>0&&<div><p className="badge-label">Незалежні</p><div style={{display:"flex",flexWrap:"wrap",gap:2}}>{c.ind.map(s=><span key={s} className="badge-ind">{s}</span>)}</div></div>}
+            </div>
+          ))}
+          {selC.length===0&&<div className="empty" style={{gridColumn:"1/-1"}}>Обери країни і теми → натисни "Запустити аналіз"</div>}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══ TAB 2: TELEGRAM ══════════════════════════════════════════
+function TabTelegram(){
+  const [raw,setRaw]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [sections,setSections]=useState([]);
+  const [err,setErr]=useState("");
+  const [filter,setFilter]=useState("all");
+  const cats=["all","ВІЙНА","ПОЛІТИКА","ЕКОНОМІКА","ЕНЕРГЕТИКА","СУСПІЛЬСТВО","МІЖНАРОДНЕ"];
+  const catLabels={all:"Всі",ВІЙНА:"⚔ Війна",ПОЛІТИКА:"🏛 Політика",ЕКОНОМІКА:"💰 Економіка",ЕНЕРГЕТИКА:"⚡ Енергетика",СУСПІЛЬСТВО:"👥 Суспільство",МІЖНАРОДНЕ:"🌍 Міжнародне"};
+  const today=new Date().toLocaleDateString("uk-UA",{day:"numeric",month:"long",year:"numeric"});
+
+  const analyze=async()=>{
+    if(!raw.trim())return;
+    setLoading(true);setSections([]);setErr("");
+    try{
+      const{text}=await callClaude(`Ти редактор новинного агентства. Сьогодні ${today}. ПРАВИЛА: 1) Жодного редакційного забарвлення. 2) Дублікати — одна подія ОДИН РАЗ. 3) Факти і вплив — ОКРЕМО. 4) Охоплюй ВСЕ (не тільки енергетику).
+
+МАТЕРІАЛ З TELEGRAM:\n${raw.slice(0,14000)}
+
+Відповідь українською:
+
+## ЩО ВІДБУЛОСЬ — ${today}
+**[КАТЕГОРІЯ]** • [✅/⚡/🔘 статус] • 📡 [N каналів]
+[Факт — 1-2 речення без оцінок]
+Категорії: ВІЙНА | ПОЛІТИКА | ЕКОНОМІКА | ЕНЕРГЕТИКА | СУСПІЛЬСТВО | МІЖНАРОДНЕ
+
+---
+
+## ВПЛИВ НА УКРАЇНУ
+## ВПЛИВ НА СВІТ
+## ВПЛИВ НА ЕНЕРГЕТИКУ ЄВРОПИ
+## ВПЛИВ НА ЕНЕРГЕТИКУ УКРАЇНИ`,false);
+      setSections(parse(text));
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  };
+
+  const eventSec=sections.find(s=>s.title.toUpperCase().startsWith("ЩО ВІДБУЛОСЬ"));
+  const impactSecs=sections.filter(s=>s.title.toUpperCase().startsWith("ВПЛИВ"));
+  const filteredEvents=eventSec?{...eventSec,items:filter==="all"?eventSec.items:eventSec.items.filter(i=>i.t!=="event"||i.v.toUpperCase().includes(filter))}:null;
+
+  return(
+    <div>
+      <div className="neutral-banner">
+        <span style={{fontSize:14,flexShrink:0}}>⚖</span>
+        <div>
+          <p style={{fontSize:11,fontWeight:500,color:"#1a1a18",margin:"0 0 3px"}}>Принцип нейтральності</p>
+          <p style={{fontSize:11,color:"#666",margin:0,lineHeight:1.6}}>Факти і вплив окремо. Жодного забарвлення на користь будь-якої держави. Одна подія з 10 каналів — один рядок з лічильником підтверджень.</p>
+        </div>
+      </div>
+      {!sections.length&&!loading&&(
+        <>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
+            <p style={{fontSize:9,letterSpacing:"0.1em",color:"#888",margin:0,textTransform:"uppercase"}}>Вставити повідомлення з Telegram</p>
+            {raw&&<button style={{fontSize:10,background:"none",border:"none",color:"#aaa",cursor:"pointer"}} onClick={()=>setRaw("")}>очистити</button>}
+          </div>
+          <textarea className="tg-textarea" value={raw} onChange={e=>setRaw(e.target.value)} placeholder={"Скопіюй і встав повідомлення з твоїх Telegram каналів...\n\nАбо вставте результат tg_digest.py\n\nКлоде сам:\n→ Знайде унікальні події і прибере дублікати\n→ Визначить категорію кожної події\n→ Перевірить скількох каналів підтвердили\n→ Оцінить вплив нейтрально по 4 вимірах"}/>
+          {raw&&<p style={{fontSize:10,color:"#aaa",margin:"4px 0 0",textAlign:"right"}}>{raw.split(/\s+/).length} слів</p>}
+          <button className="btn-primary" onClick={analyze} disabled={!raw.trim()} style={{marginTop:10,marginBottom:14}}>Аналізувати без упередження ↗</button>
+        </>
+      )}
+      {sections.length>0&&!loading&&(
+        <div style={{display:"flex",gap:8,marginBottom:14,alignItems:"center"}}>
+          <button className="btn-secondary" onClick={()=>{setSections([]);setErr("");}}>← Новий дайджест</button>
+          <span style={{fontSize:10,color:"#aaa"}}>{eventSec?.items.filter(i=>i.t==="event").length||0} подій · {impactSecs.length} блоки впливу</span>
+        </div>
+      )}
+      {loading&&<Spinner msgs={["Читаю повідомлення...","Знаходжу дублікати...","Розділяю факти від оцінок...","Формую дайджест..."]}/>}
+      {err&&<div className="error-box">Помилка: {err}</div>}
+      {!loading&&filteredEvents&&(
+        <div style={{marginBottom:12}}>
+          <div className="chips" style={{marginBottom:10}}>{cats.map(c=><button key={c} className={`chip${filter===c?" on-blue":""}`} onClick={()=>setFilter(c)}>{catLabels[c]||c}</button>)}</div>
+          <SectionCard sec={filteredEvents}/>
+        </div>
+      )}
+      {!loading&&impactSecs.length>0&&(
+        <div>
+          <p style={{fontSize:9,letterSpacing:"0.1em",color:"#888",margin:"12px 0 8px",textTransform:"uppercase"}}>Оцінка впливу — незалежно по кожному виміру</p>
+          <div className="impact-grid">{impactSecs.map((s,i)=><SectionCard key={i} sec={s}/>)}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ═══ TAB 3: COMBINED ══════════════════════════════════════════
+function TabCombined({selC,selT}){
+  const [loading,setLoading]=useState(false);
+  const [sections,setSections]=useState([]);
+  const [searches,setSearches]=useState([]);
+  const [err,setErr]=useState("");
+  const today=new Date().toLocaleDateString("uk-UA",{day:"numeric",month:"long",year:"numeric"});
+
+  const analyze=async()=>{
+    setLoading(true);setSections([]);setErr("");setSearches([]);
+    const cBlock=selC.map(code=>{const c=MEDIA_DB.find(x=>x.code===code);return c?`${c.flag}${c.name}`:null;}).filter(Boolean).join(", ");
+    try{
+      const{text,searches:sq}=await callClaude(`Ти головний аналітик з торгівлі електроенергією. Сьогодні ${today}. Виконай МІНІМУМ 8 web_search.
+
+КОНТЕКСТ: Крос-бордерний арбітраж RO→UA. Алгоритм K = DAM_forecast/51 − avg(Aisik,Casory) − 14.25€.
+
+КРАЇНИ: ${cBlock||"ключові енергетичні країни Європи"}
+
+Шукай: TTF gas price today; European electricity prices today; Ukraine energy market today; Romania OPCOM DAM today; RO UA cross-border electricity; заяви лідерів по енергетиці; ОПЕК+ oil today; LNG Europe today.
+
+Відповідь українською:
+
+## ТОП-НОВИНИ ДНЯ
+🔴/🟡/🟢 | Країна | Джерело | Суть | Вплив на RO→UA. Мінімум 12 новин.
+
+## ЦІНОВА КАРТИНА
+### TTF / Природний газ
+### DA ціни — Румунія (OPCOM)
+### DA ціни — Україна (DAM)
+### Brent / Нафта
+### Spread RO→UA (орієнтовний K)
+
+## ЗАЯВИ ТА РІШЕННЯ ЛІДЕРІВ
+
+## РИЗИКИ ТА МОЖЛИВОСТІ
+
+## АЛГОРИТМ ЗАЯВКИ RO→UA
+Орієнтовний K на сьогодні, рекомендований крок, пояснення.
+
+## ВИСНОВОК АНАЛІТИКА`,true);
+      setSearches(sq);setSections(parse(text));
+    }catch(e){setErr(e.message);}
+    setLoading(false);
+  };
+
+  return(
+    <div>
+      <div className="info-box">
+        <p style={{fontSize:11,fontWeight:500,color:"#1a1a18",margin:"0 0 4px"}}>Зведений аналіз + RO→UA торговий брифінг</p>
+        <p style={{fontSize:11,color:"#666",margin:0,lineHeight:1.6}}>Глобальні ЗМІ + дані TSO + ціни DAM/TTF/OPCOM + заяви лідерів = конкретний сигнал для арбітражної заявки на сьогодні. Щоденно о <strong>08:30 Київ</strong>.</p>
+      </div>
+      <button className="btn-primary" onClick={analyze} disabled={loading} style={{marginBottom:14}}>{loading?"Формую зведений брифінг...":"Запустити повний аналіз ↗"}</button>
+      {loading&&<Spinner/>}
+      {err&&<div className="error-box">Помилка: {err}</div>}
+      {!loading&&searches.length>0&&<div className="search-log">🔍 {searches.map((q,i)=><span key={i} style={{marginRight:8}}>"{q}"</span>)}</div>}
+      {!loading&&sections.map((s,i)=><SectionCard key={i} sec={s}/>)}
+      {!loading&&sections.length===0&&!err&&<div className="empty">Натисни "Запустити повний аналіз"<br/><span style={{fontSize:11}}>Глобальні ЗМІ + TSO + ціни + RO→UA сигнал</span></div>}
+    </div>
+  );
+}
+
+// ═══ LOGIN ════════════════════════════════════════════════════
+function Login({onLogin}){
+  const [login,setLogin]=useState("");
+  const [pass,setPass]=useState("");
+  const [err,setErr]=useState("");
+
+  const submit=()=>{
+    const user=USERS.find(u=>u.login===login&&u.pass===pass);
+    if(user){onLogin(user.login);}
+    else{setErr("Невірний логін або пароль");}
+  };
+
+  return(
+    <div className="login-wrap">
+      <div className="login-card">
+        <p style={{fontSize:9,letterSpacing:"0.15em",color:"#888",margin:"0 0 12px",textTransform:"uppercase"}}>Energy Intelligence Platform</p>
+        <h1 className="login-title">Вхід</h1>
+        <p className="login-sub">Закрита аналітична платформа</p>
+        <input className="login-input" placeholder="Логін" value={login} onChange={e=>setLogin(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}/>
+        <input className="login-input" type="password" placeholder="Пароль" value={pass} onChange={e=>setPass(e.target.value)} onKeyDown={e=>e.key==="Enter"&&submit()}/>
+        <button className="login-btn" onClick={submit}>Увійти →</button>
+        {err&&<p className="login-error">{err}</p>}
+      </div>
+    </div>
+  );
+}
+
+// ═══ MAIN APP ═════════════════════════════════════════════════
+function App(){
+  const [user,setUser]=useState(()=>sessionStorage.getItem("ei_user")||null);
+  const [tab,setTab]=useState("media");
+  const [selC,setSelC]=useState(["UA","RO","EU","DE","NO","RU","SA","PL","AZ","TR","INT","NL"]);
+  const [selT,setSelT]=useState(["gas","power","sanctions","transit","prices","speeches"]);
+
+  const login=(u)=>{sessionStorage.setItem("ei_user",u);setUser(u);};
+  const logout=()=>{sessionStorage.removeItem("ei_user");setUser(null);};
+
+  if(!user)return <Login onLogin={login}/>;
+
+  const today=new Date().toLocaleDateString("uk-UA",{weekday:"long",day:"numeric",month:"long"});
+  const tabs=[
+    {id:"media",label:"🌍 Світові ЗМІ",desc:"24 країни · 140+ видань · TSO"},
+    {id:"telegram",label:"📱 Telegram",desc:"Нейтральний дайджест"},
+    {id:"combined",label:"📊 Зведений аналіз",desc:"RO→UA брифінг · 08:30"},
+  ];
+
+  return(
+    <div style={{minHeight:"100vh",background:"#f8f7f4"}}>
+      <div className="container">
+        <div className="header">
+          <div>
+            <p className="header-label">Energy Intelligence Platform</p>
+            <h1 style={{fontSize:22,fontWeight:500,margin:0,color:"#1a1a18"}}>Аналіз енергетичного ринку</h1>
+          </div>
+          <div style={{textAlign:"right"}}>
+            <p className="header-date">{today}</p>
+            <p className="header-date" style={{marginTop:2}}>{user} · <button onClick={logout} style={{fontSize:11,background:"none",border:"none",color:"#185FA5",cursor:"pointer"}}>вийти</button></p>
+          </div>
+        </div>
+
+        <div className="tabs">
+          {tabs.map(t=>(
+            <button key={t.id} className={`tab${tab===t.id?" active":""}`} onClick={()=>setTab(t.id)}>
+              {t.label}<span className="tab-desc">{t.desc}</span>
+            </button>
+          ))}
+        </div>
+
+        <div className="fin">
+          {tab==="media"&&<TabMedia selC={selC} setSelC={setSelC} selT={selT} setSelT={setSelT}/>}
+          {tab==="telegram"&&<TabTelegram/>}
+          {tab==="combined"&&<TabCombined selC={selC} selT={selT}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
